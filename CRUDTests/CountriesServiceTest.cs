@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using ServiceContract;
-using Entities;
 using Services;
 using ServiceContract.DTO;
 using Xunit;
+
 namespace CRUDTests
 {
-  public class CountriesServiceTest
+    public class CountriesServiceTest
     {
         private readonly ICountriesService _countriesService;
 
@@ -16,105 +15,133 @@ namespace CRUDTests
         {
             _countriesService = new CountriesService();
         }
+
         #region AddCountry
         [Fact]
-        public void AddCountry_NullCountry() {
-            //arrange
+        public void AddCountry_NullCountry()
+        {
             CountryAddRequest? request = null;
-            //Act
-           
-            //Assert
+
             Assert.Throws<ArgumentNullException>(() => { _countriesService.AddCountry(request); });
         }
 
         [Fact]
         public void AddCountry_NullCountryNameNULL()
         {
-            //arrange
             CountryAddRequest? request = new CountryAddRequest { CountryName = null };
-            //Act
 
-            //Assert
             Assert.Throws<ArgumentException>(() => { _countriesService.AddCountry(request); });
         }
 
-        //validate with countryName
         [Fact]
-        public void AddCountry_CountryName() {
-
-            //arrange
+        public void AddCountry_CountryName()
+        {
             CountryAddRequest? request = new CountryAddRequest { CountryName = "England" };
-            //Act
+
             var response = _countriesService.AddCountry(request);
-            //Assert
+
             Assert.NotNull(response);
             Assert.Equal("England", response.CountryName);
         }
-        [Fact]
 
+        [Fact]
         public void AddCountry_DuplicateCountryName()
         {
-            //arrange
-            CountryAddRequest? request1 = new CountryAddRequest { CountryName = "England " };
-            CountryAddRequest? request2 = new CountryAddRequest { CountryName = "Bangladesh" };
-            //Act
+            CountryAddRequest? request1 = new CountryAddRequest { CountryName = "England" };
+            CountryAddRequest? request2 = new CountryAddRequest { CountryName = "England" };
+
             var response1 = _countriesService.AddCountry(request1);
-            //Assert
+
             Assert.NotNull(response1);
             Assert.Equal("England", response1.CountryName);
-            //Act and Assert for duplicate country name
             Assert.Throws<ArgumentException>(() => { _countriesService.AddCountry(request2); });
         }
         #endregion
 
-
         #region GetAllCountries
         [Fact]
-
         public void GetAllCountries_EmptyList()
         {
-            //arrange
-            //Act
-           List<CountryResponse> response = _countriesService.GetAllCountries();
-            //Assert
+            List<CountryResponse> response = _countriesService.GetAllCountries();
+
             Assert.NotNull(response);
             Assert.Empty(response);
         }
-
-
         #endregion
 
+        #region GetAllCountriesAddFewCountries
         [Fact]
-        #region GetAllCountriesAddFewCountriest
-
         public void GetAllCountries_AddFewCountries()
         {
             List<CountryResponse> response = new List<CountryResponse>();
 
-            //Arrange
             List<CountryAddRequest> requests = new List<CountryAddRequest>
             {
                 new CountryAddRequest { CountryName = "England" },
                 new CountryAddRequest { CountryName = "Bangladesh" },
                 new CountryAddRequest { CountryName = "India" }
-
             };
-            //Act 
-            foreach(CountryAddRequest country_Request in requests)
+
+            foreach (CountryAddRequest countryRequest in requests)
             {
-                response.Add(_countriesService.AddCountry(country_Request));
-              
+                response.Add(_countriesService.AddCountry(countryRequest));
             }
-            //Assert
+
             List<CountryResponse> actualResponses = _countriesService.GetAllCountries();
-            foreach(CountryResponse countryResponse in response)
+            foreach (CountryResponse countryResponse in response)
             {
-                Assert.Contains(countryResponse, actualResponses);
+                Assert.Contains(actualResponses, item => item.CountryName == countryResponse.CountryName);
             }
         }
-
         #endregion
 
+        [Fact]
+        #region GetCountrywithProperdetails
 
+        public void AddCountry_ProperCountryDetails()
+        {
+           //arrange
+            CountryAddRequest ? request= new CountryAddRequest { CountryName = "Ghana" };
+            //act 
+            CountryResponse? response = _countriesService.AddCountry(request);
+            List<CountryResponse> actualResponses = _countriesService.GetAllCountries();
+            //assert
+            Assert.True(response.CountryID != Guid.Empty);
+            Assert.Contains(response, actualResponses);
+
+        }
+        #endregion
+
+        [Fact]
+        #region countriesByIDnull
+        public void GetCountryById_NullId()
+        {
+            // Arrange
+            Guid? countryID = null;
+
+            //Act 
+            CountryResponse? country_response_from_get_method = _countriesService.GetCountryById(countryID);
+            // Assert
+
+            Assert.Null(country_response_from_get_method);
+        }
+        #endregion
+        
+        [Fact]
+        #region countriesByIDvalid
+        public void GetCountryById_ValidId()
+        {
+            // Arrange
+            CountryAddRequest? request = new CountryAddRequest { CountryName = "Ghana" };
+            CountryResponse? addedCountry = _countriesService.AddCountry(request);
+            // Act
+            CountryResponse? retrievedCountry = _countriesService.GetCountryById(addedCountry.CountryID);
+            // Assert
+            Assert.NotNull(retrievedCountry);
+            Assert.Equal(addedCountry.CountryID, retrievedCountry.CountryID);
+            Assert.Equal(addedCountry.CountryName, retrievedCountry.CountryName);
+        }
+        #endregion
+        
     }
 }

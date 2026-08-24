@@ -36,6 +36,7 @@ namespace Services
 
             //convert object from CountryAddRequest to Country Type
             Country country =countryAddRequest.ToCountry();
+            // generate new guid for countryid and add the country to the list
             country.CountryId = Guid.NewGuid();
             _countries.Add(country);
             return country.ToCountryResponse();
@@ -48,6 +49,19 @@ namespace Services
         public List<CountryResponse> GetAllCountries()
         {
             return _countries.Select(c => c.ToCountryResponse()).ToList();
+        }
+
+        public CountryResponse? GetCountryById(Guid? countryId)
+        {
+            //throw new NotImplementedException();
+            if(countryId == null)
+            {
+                return null;
+            }
+            
+
+            Country? country_response_from_list = _countries.FirstOrDefault(temp => temp.CountryId == countryId);
+            return country_response_from_list?.ToCountryResponse();
         }
     }
 }
