@@ -1,6 +1,6 @@
-﻿using ServiceContract;
+﻿using Entities;
+using ServiceContract;
 using ServiceContract.DTO;
-using Entities;
 namespace Services
 {
     public class CountriesService : ICountriesService
@@ -27,15 +27,16 @@ namespace Services
             }
             //duplicate countriesName are not allowed
 
-            if (_countries.Where(temp=>temp.CountryName==countryAddRequest.CountryName).Count()>0) {
+            if (_countries.Where(temp => temp.CountryName==countryAddRequest.CountryName).Count()>0)
+            {
                 throw new ArgumentException("Country with the same name already exists.", nameof(countryAddRequest.CountryName));
-            
+
             }
 
 
 
             //convert object from CountryAddRequest to Country Type
-            Country country =countryAddRequest.ToCountry();
+            Country country = countryAddRequest.ToCountry();
             // generate new guid for countryid and add the country to the list
             country.CountryId = Guid.NewGuid();
             _countries.Add(country);
@@ -54,11 +55,11 @@ namespace Services
         public CountryResponse? GetCountryById(Guid? countryId)
         {
             //throw new NotImplementedException();
-            if(countryId == null)
+            if (countryId == null)
             {
                 return null;
             }
-            
+
 
             Country? country_response_from_list = _countries.FirstOrDefault(temp => temp.CountryId == countryId);
             return country_response_from_list?.ToCountryResponse();
